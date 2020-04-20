@@ -3,35 +3,37 @@ const EVENT_TYPES = {
     incoming_message: "incoming_message",
     webhook: "webhook"
 }
-function VoximplantKit(context) {
-    // Store request data
-    this.requestData = context.request.body
-    // Get event type
-    this.eventType = (typeof context.request.headers["x-kit-event-type"] !== "undefined") ? context.request.headers["x-kit-event-type"] : EVENT_TYPES.webhook
-    // Get access token
-    this.accessToken = (typeof context.request.headers["x-kit-access-token"] !== "undefined") ?  context.request.headers["x-kit-access-token"] : ""
-    // Store call data
-    this.call = this.getCallData()
-    // Store variables data
-    this.variables = this.getVariables()
-    // Store skills data
-    this.skills = this.getSkills()
-    // Max skill level
-    this.maxSkillLevel = 5
-    // Prepare response
-    this.response = {
-        status: 200,
-        body: "",
-        headers: {
-            "content-type": "application/json"
+class VoximplantKit {
+    constructor(context) {
+        // Store request data
+        this.requestData = context.request.body
+        // Get event type
+        this.eventType = (typeof context.request.headers["x-kit-event-type"] !== "undefined") ? context.request.headers["x-kit-event-type"] : EVENT_TYPES.webhook
+        // Get access token
+        this.accessToken = (typeof context.request.headers["x-kit-access-token"] !== "undefined") ?  context.request.headers["x-kit-access-token"] : ""
+        // Store call data
+        this.call = this.getCallData()
+        // Store variables data
+        this.variables = this.getVariables()
+        // Store skills data
+        this.skills = this.getSkills()
+        // Max skill level
+        this.maxSkillLevel = 5
+        // Prepare response
+        this.response = {
+            status: 200,
+            body: "",
+            headers: {
+                "content-type": "application/json"
+            }
+        }
+        this.responseData = {
+            VARIABLES: {},
+            SKILLS: []
         }
     }
-    this.responseData = {
-        VARIABLES: {},
-        SKILLS: []
-    }
     // Prepare function response
-    this.makeResponse = ()=> {
+    makeResponse(){
         if (this.eventType === EVENT_TYPES.in_call_function)
             this.response.body = JSON.stringify({
                 "VARIABLES": this.variables,
@@ -45,27 +47,27 @@ function VoximplantKit(context) {
         return this.response
     }
     // Set auth token
-    this.setAccessToken = (token) => {
+    setAccessToken(token){
         this.accessToken = token
     }
     // Get all call data
-    this.getCallData = () => {
+    getCallData(){
         return (typeof this.requestData.CALL !== "undefined") ? this.requestData.CALL : null
     }
     // Get all variables
-    this.getVariables = ()=> {
+    getVariables(){
         return (typeof this.requestData.VARIABLES !== "undefined") ? this.requestData.VARIABLES : {}
     }
     // Get all skills
-    this.getSkills = ()=>{
+    getSkills(){
         return (typeof this.requestData.SKILLS !== "undefined") ? this.requestData.SKILLS : []
     }
     // Set variable
-    this.setVariable = (name, value) =>{
+    setVariable(name, value){
         this.responseData.VARIABLES[name] = value
     }
     // Set skill
-    this.setSkill = (id, level)=> {
+    setSkill(id, level){
         const skillIndex = this.skills.findIndex(skill => {
             return skill.id === id
         })
@@ -76,7 +78,7 @@ function VoximplantKit(context) {
         else this.skills[skillIndex].level = level
     }
     // Remove skill
-    this.removeSkill = (id)=> {
+    removeSkill(id){
         const skillIndex = this.skills.findIndex(skill => {
             return skill.skill_id === id
         })
