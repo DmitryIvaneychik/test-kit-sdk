@@ -81,7 +81,7 @@ class VoximplantKit {
     // Set skill
     setSkill(id, level){
         const skillIndex = this.skills.findIndex(skill => {
-            return skill.id === id
+            return skill.skill_id === id
         })
         if (skillIndex === -1) this.skills.push({
             "skill_id": id,
