@@ -46,6 +46,18 @@ class VoximplantKit {
             })
         return this.response
     }
+    getResponseBody(){
+        if (this.eventType === EVENT_TYPES.in_call_function)
+            return {
+                "VARIABLES": this.variables,
+                "SKILLS": this.skills
+            }
+        else
+            return {
+                "success": true,
+                "result": true
+            }
+    }
     // Set auth token
     setAccessToken(token){
         this.accessToken = token
