@@ -89,4 +89,4 @@ var VoximplantKit = /** @class */ (function () {
     };
     return VoximplantKit;
 }());
-exports["default"] = VoximplantKit;
+module.exports = VoximplantKit
