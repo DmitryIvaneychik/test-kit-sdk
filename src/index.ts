@@ -4,7 +4,7 @@ const EVENT_TYPES = {
     webhook: "webhook"
 }
 
-interface CallObject {
+export interface CallObject {
     id:number
     result_code:number
     attempt_num:number
@@ -16,23 +16,60 @@ interface CallObject {
     phone_b:string
     record_url:string
 }
-interface ContextObject {
+export interface ContextObject {
     request:RequestObject
 }
 
-interface RequestObject {
+export interface RequestObject {
     body:object
     headers:object
 }
 
-interface SkillObject {
+export interface SkillObject {
     skill_name:string
     level:number
 }
 
-interface ResponseDataObject {
+export interface ResponseDataObject {
     VARIABLES:object
     SKILLS:Array<SkillObject>
+}
+
+export interface IncomingMessageObject {
+    text:string
+    sender:SenderObject
+    conversation:ConversationObject
+}
+
+export interface ConversationObject {
+    id:number
+    uuid:string
+    client_id:string
+    custom_data:ConversationCustomDataObject
+}
+
+export interface ConversationCustomDataObject {
+    client_data:ConversationCustomDataClientDataObject
+    conversation_data:ConversationCustomDataConversationDataObject
+}
+
+export interface ConversationCustomDataClientDataObject {
+    client_id:string
+    client_phone:string
+    client_avatar:string
+    client_display_name:string
+}
+
+export interface ConversationCustomDataConversationDataObject {
+    last_message_text:string
+    last_message_time:number
+    channel_type:string
+    last_message_sender_type:string
+    is_read:boolean
+}
+
+export interface SenderObject {
+    is_bot:boolean
 }
 
 export default class VoximplantKit {
@@ -41,6 +78,7 @@ export default class VoximplantKit {
         VARIABLES:{},
         SKILLS:[]
     }
+    // private responseMessageData:MessageObject = {}
 
     private accessToken:string = null
     private sessionAccessUrl:string = null
@@ -82,6 +120,12 @@ export default class VoximplantKit {
         else
             return data
     }
+
+    // Get incoming message
+    getIncomingMessage():IncomingMessageObject{
+        return this.requestData
+    }
+
     // Set auth token
     setAccessToken(token){
         this.accessToken = token
