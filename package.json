@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "Voximplant Kit clound functions client",
   "main": "dist/index.js",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "typings": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
