@@ -35,13 +35,7 @@ export interface ResponseDataObject {
     SKILLS:Array<SkillObject>
 }
 
-export interface IncomingMessageObject {
-    text:string
-    sender:SenderObject
-    conversation:ConversationObject
-}
-
-export interface ConversationObject {
+export interface MessageConversation {
     id:number
     uuid:string
     client_id:string
@@ -68,8 +62,36 @@ export interface ConversationCustomDataConversationDataObject {
     is_read:boolean
 }
 
-export interface SenderObject {
+export interface QueueInfo {
+    queue_id:number
+    queue_name:string
+}
+
+export interface MessageObject {
+    text:string
+    type:string
+    sender:MessageSender
+    conversation:MessageConversation
+    payload:Array<MessagePayloadItem>
+}
+
+export interface MessageSender {
     is_bot:boolean
+}
+
+export interface MessagePayloadItem {
+    type:string
+    message_type?:string
+    name?:string
+    queue?:QueueInfo
+    text?:string
+    url?:string
+    latitude?:number
+    longitude?:number
+    address?:string
+    keys?:any
+    file_name?:string
+    file_size?:number
 }
 
 export default class VoximplantKit {
@@ -87,6 +109,9 @@ export default class VoximplantKit {
     variables:object = {}
     headers:object = {}
     skills:Array<SkillObject> = []
+
+    incomingMessage:MessageObject
+    replyMessage:MessageObject
     // maxSkillLevel:number = 5
 
     constructor(context:ContextObject) {
@@ -109,6 +134,17 @@ export default class VoximplantKit {
             VARIABLES: {},
             SKILLS: []
         }
+
+        if (this.eventType === EVENT_TYPES.incoming_message) {
+            this.incomingMessage = this.getIncomingMessage()
+            this.replyMessage.type = this.incomingMessage.type
+            this.replyMessage.sender.is_bot = true
+            this.replyMessage.conversation = this.incomingMessage.conversation
+            this.replyMessage.payload.push({
+                type: "properties",
+                message_type: "text"
+            });
+        }
     }
     // Get function response
     getResponseBody(data:any) {
@@ -122,7 +158,7 @@ export default class VoximplantKit {
     }
 
     // Get incoming message
-    getIncomingMessage():IncomingMessageObject{
+    getIncomingMessage():MessageObject{
         return this.requestData
     }
 
@@ -162,5 +198,54 @@ export default class VoximplantKit {
         if (skillIndex > -1) {
             this.skills.splice(skillIndex, 1)
         }
+    }
+
+    // Transfer to queue
+    transferToQueue(queue:QueueInfo){
+        if (this.eventType !== EVENT_TYPES.incoming_message) return false
+
+        if (typeof queue.queue_id === "undefined") queue.queue_id = null;
+        if (typeof queue.queue_name === "undefined") queue.queue_name = null;
+
+        if (queue.queue_id === null && queue.queue_name === null) return false
+
+        const payloadIndex = this.replyMessage.payload.findIndex(item => {
+            return item.type === "cmd" && item.name === "transfer_to_queue"
+        })
+        if (payloadIndex > -1) {
+            this.replyMessage.payload[payloadIndex].queue = queue
+        } else {
+            this.replyMessage.payload.push({
+                type:"cmd",
+                name:"transfer_to_queue",
+                queue:queue
+            })
+        }
+
+        return true
+    }
+
+    // Cancel transfer to queue
+    cancelTransferToQueue(){
+        const payloadIndex = this.replyMessage.payload.findIndex(item => {
+            return item.type === "cmd" && item.name === "transfer_to_queue"
+        })
+        if (payloadIndex > -1) {
+            this.replyMessage.payload.splice(payloadIndex, 1)
+        }
+
+        return true
+    }
+
+    // Add photo
+    addPhoto(url) {
+        this.replyMessage.payload.push({
+            type:"photo",
+            url:url,
+            file_name:"file",
+            file_size:123
+        })
+
+        return true
     }
 }

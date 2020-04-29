@@ -39,6 +39,16 @@ class VoximplantKit {
             VARIABLES: {},
             SKILLS: []
         };
+        if (this.eventType === EVENT_TYPES.incoming_message) {
+            this.incomingMessage = this.getIncomingMessage();
+            this.replyMessage.type = this.incomingMessage.type;
+            this.replyMessage.sender.is_bot = true;
+            this.replyMessage.conversation = this.incomingMessage.conversation;
+            this.replyMessage.payload.push({
+                type: "properties",
+                message_type: "text"
+            });
+        }
     }
     // Get function response
     getResponseBody(data) {
@@ -91,6 +101,51 @@ class VoximplantKit {
         if (skillIndex > -1) {
             this.skills.splice(skillIndex, 1);
         }
+    }
+    // Transfer to queue
+    transferToQueue(queue) {
+        if (this.eventType !== EVENT_TYPES.incoming_message)
+            return false;
+        if (typeof queue.queue_id === "undefined")
+            queue.queue_id = null;
+        if (typeof queue.queue_name === "undefined")
+            queue.queue_name = null;
+        if (queue.queue_id === null && queue.queue_name === null)
+            return false;
+        const payloadIndex = this.replyMessage.payload.findIndex(item => {
+            return item.type === "cmd" && item.name === "transfer_to_queue";
+        });
+        if (payloadIndex > -1) {
+            this.replyMessage.payload[payloadIndex].queue = queue;
+        }
+        else {
+            this.replyMessage.payload.push({
+                type: "cmd",
+                name: "transfer_to_queue",
+                queue: queue
+            });
+        }
+        return true;
+    }
+    // Cancel transfer to queue
+    cancelTransferToQueue() {
+        const payloadIndex = this.replyMessage.payload.findIndex(item => {
+            return item.type === "cmd" && item.name === "transfer_to_queue";
+        });
+        if (payloadIndex > -1) {
+            this.replyMessage.payload.splice(payloadIndex, 1);
+        }
+        return true;
+    }
+    // Add photo
+    addPhoto(url) {
+        this.replyMessage.payload.push({
+            type: "photo",
+            url: url,
+            file_name: "file",
+            file_size: 123
+        });
+        return true;
     }
 }
 exports.default = VoximplantKit;
