@@ -128,7 +128,7 @@ export default class VoximplantKit {
         // Get access token
         this.accessToken = (typeof context.request.headers["x-kit-access-token"] !== "undefined") ?  context.request.headers["x-kit-access-token"] : ""
         // Get domain
-        this.domain = (typeof context.request.headers["x-kit-domain"] !== "undefined") ?  context.request.headers["x-kit-domain"] : ""
+        this.domain = (typeof context.request.headers["x-kit-domain"] !== "undefined") ?  context.request.headers["x-kit-domain"] : "annaclover"
         // Get session access url
         this.sessionAccessUrl = (typeof context.request.headers["x-kit-session-access-url"] !== "undefined") ?  context.request.headers["x-kit-session-access-url"] : ""
         // Store call data
