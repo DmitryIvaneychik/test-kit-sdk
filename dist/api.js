@@ -4,7 +4,8 @@ const axios_1 = require("axios");
 class api {
     constructor(domain, token) {
         this.client = axios_1.default.create({
-            baseURL: "https://kit.voximplant.com/api",
+            // baseURL: "https://kit.voximplant.com/api",
+            baseURL: "https://voximplant.xyz/api",
             method: "POST",
             responseType: "json",
         });
