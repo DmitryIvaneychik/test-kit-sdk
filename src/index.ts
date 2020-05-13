@@ -1,3 +1,5 @@
+import api from "./api"
+
 const EVENT_TYPES = {
     in_call_function: "in_call_function",
     incoming_message: "incoming_message",
@@ -104,6 +106,8 @@ export default class VoximplantKit {
 
     private accessToken:string = null
     private sessionAccessUrl:string = null
+    private domain:string = null
+
     eventType:string = EVENT_TYPES.webhook
     call:CallObject = null
     variables:object = {}
@@ -114,6 +118,8 @@ export default class VoximplantKit {
     replyMessage:MessageObject
     // maxSkillLevel:number = 5
 
+    api:any
+
     constructor(context:ContextObject) {
         // Store request data
         this.requestData = context.request.body
@@ -121,6 +127,8 @@ export default class VoximplantKit {
         this.eventType = (typeof context.request.headers["x-kit-event-type"] !== "undefined") ? context.request.headers["x-kit-event-type"] : EVENT_TYPES.webhook
         // Get access token
         this.accessToken = (typeof context.request.headers["x-kit-access-token"] !== "undefined") ?  context.request.headers["x-kit-access-token"] : ""
+        // Get domain
+        this.domain = (typeof context.request.headers["x-kit-domain"] !== "undefined") ?  context.request.headers["x-kit-domain"] : ""
         // Get session access url
         this.sessionAccessUrl = (typeof context.request.headers["x-kit-session-access-url"] !== "undefined") ?  context.request.headers["x-kit-session-access-url"] : ""
         // Store call data
@@ -134,6 +142,8 @@ export default class VoximplantKit {
             VARIABLES: {},
             SKILLS: []
         }
+
+        this.api = new api(this.domain, this.accessToken)
 
         if (this.eventType === EVENT_TYPES.incoming_message) {
             this.incomingMessage = this.getIncomingMessage()
@@ -235,6 +245,19 @@ export default class VoximplantKit {
         }
 
         return true
+    }
+
+    private loadDB(db_name:string) {
+
+    }
+
+    // Send message
+    sendMessage(from:string, to:string, message:string) {
+
+    }
+
+    getAccountInfo() {
+        return this.api.request("/v3/account/getAccountInfo")
     }
 
     // Add photo

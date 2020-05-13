@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const api_1 = require("./api");
 const EVENT_TYPES = {
     in_call_function: "in_call_function",
     incoming_message: "incoming_message",
     webhook: "webhook"
 };
 class VoximplantKit {
-    // maxSkillLevel:number = 5
     constructor(context) {
         this.requestData = {};
         this.responseData = {
@@ -16,6 +16,7 @@ class VoximplantKit {
         // private responseMessageData:MessageObject = {}
         this.accessToken = null;
         this.sessionAccessUrl = null;
+        this.domain = null;
         this.eventType = EVENT_TYPES.webhook;
         this.call = null;
         this.variables = {};
@@ -27,6 +28,8 @@ class VoximplantKit {
         this.eventType = (typeof context.request.headers["x-kit-event-type"] !== "undefined") ? context.request.headers["x-kit-event-type"] : EVENT_TYPES.webhook;
         // Get access token
         this.accessToken = (typeof context.request.headers["x-kit-access-token"] !== "undefined") ? context.request.headers["x-kit-access-token"] : "";
+        // Get domain
+        this.domain = (typeof context.request.headers["x-kit-domain"] !== "undefined") ? context.request.headers["x-kit-domain"] : "";
         // Get session access url
         this.sessionAccessUrl = (typeof context.request.headers["x-kit-session-access-url"] !== "undefined") ? context.request.headers["x-kit-session-access-url"] : "";
         // Store call data
@@ -39,6 +42,7 @@ class VoximplantKit {
             VARIABLES: {},
             SKILLS: []
         };
+        this.api = new api_1.default(this.domain, this.accessToken);
         if (this.eventType === EVENT_TYPES.incoming_message) {
             this.incomingMessage = this.getIncomingMessage();
             this.replyMessage.type = this.incomingMessage.type;
@@ -136,6 +140,14 @@ class VoximplantKit {
             this.replyMessage.payload.splice(payloadIndex, 1);
         }
         return true;
+    }
+    loadDB(db_name) {
+    }
+    // Send message
+    sendMessage(from, to, message) {
+    }
+    getAccountInfo() {
+        return this.api.request("/v3/account/getAccountInfo");
     }
     // Add photo
     addPhoto(url) {

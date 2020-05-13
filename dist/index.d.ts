@@ -81,6 +81,7 @@ export default class VoximplantKit {
     private responseData;
     private accessToken;
     private sessionAccessUrl;
+    private domain;
     eventType: string;
     call: CallObject;
     variables: object;
@@ -88,6 +89,7 @@ export default class VoximplantKit {
     skills: Array<SkillObject>;
     incomingMessage: MessageObject;
     replyMessage: MessageObject;
+    api: any;
     constructor(context: ContextObject);
     getResponseBody(data: any): any;
     getIncomingMessage(): MessageObject;
@@ -99,5 +101,8 @@ export default class VoximplantKit {
     removeSkill(name: string): void;
     transferToQueue(queue: QueueInfo): boolean;
     cancelTransferToQueue(): boolean;
+    private loadDB(db_name);
+    sendMessage(from: string, to: string, message: string): void;
+    getAccountInfo(): any;
     addPhoto(url: any): boolean;
 }
