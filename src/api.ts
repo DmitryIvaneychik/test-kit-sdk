@@ -6,7 +6,8 @@ export default class api {
     constructor(domain:string, token:string) {
 
         this.client = axios.create({
-            baseURL: "https://kit.voximplant.com/api",
+            // baseURL: "https://kit.voximplant.com/api",
+            baseURL: "https://voximplant.xyz/api",
             method: "POST",
             responseType: "json",
         })
