@@ -4,6 +4,7 @@ export default class api {
     private client:AxiosInstance
 
     constructor(domain:string, token:string) {
+
         this.client = axios.create({
             baseURL: "https://kit.voximplant.com/api",
             method: "POST",
@@ -11,6 +12,8 @@ export default class api {
         })
 
         this.client.interceptors.request.use((param: AxiosRequestConfig) => {
+            if (typeof param.params === "undefined") param.params = {}
+
             param.params.domain = domain
             param.params.access_token = token
 

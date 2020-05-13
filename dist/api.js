@@ -9,6 +9,8 @@ class api {
             responseType: "json",
         });
         this.client.interceptors.request.use((param) => {
+            if (typeof param.params === "undefined")
+                param.params = {};
             param.params.domain = domain;
             param.params.access_token = token;
             return param;
