@@ -9,13 +9,13 @@ class api {
             baseURL: "https://kit.voximplant.com/api",
             method: "POST",
             responseType: "json",
-            transformRequest: this.transformRequest
         });
-    }
-    transformRequest(data, headers) {
-        data.domain = this.domain;
-        data.access_token = this.access_token;
-        return data;
+        const _this = this;
+        this.client.interceptors.request.use((param) => {
+            param.params.domain = _this.domain;
+            param.params.access_token = _this.access_token;
+            return param;
+        });
     }
     request(requestUrl) {
         return this.client.request({

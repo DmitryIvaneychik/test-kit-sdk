@@ -4,6 +4,5 @@ export default class api {
     private domain;
     private access_token;
     constructor(domain: string, token: string);
-    private transformRequest(data, headers);
     request<T, R = AxiosResponse<T>>(requestUrl: any): Promise<R>;
 }

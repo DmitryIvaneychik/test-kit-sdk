@@ -1,4 +1,4 @@
-import axios, {AxiosInstance, AxiosTransformer, AxiosResponse} from 'axios'
+import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
 
 export default class api {
     private client:AxiosInstance
@@ -12,13 +12,15 @@ export default class api {
             baseURL: "https://kit.voximplant.com/api",
             method: "POST",
             responseType: "json",
-            transformRequest: this.transformRequest
         })
-    }
-    private transformRequest(data, headers):AxiosTransformer {
-        data.domain = this.domain
-        data.access_token = this.access_token
-        return data
+
+        const _this = this
+        this.client.interceptors.request.use((param: AxiosRequestConfig) => {
+            param.params.domain = _this.domain
+            param.params.access_token = _this.access_token
+
+            return param
+        });
     }
 
     request<T, R = AxiosResponse<T>> (requestUrl):Promise<R> {
