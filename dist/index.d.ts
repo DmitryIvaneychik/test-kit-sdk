@@ -1,3 +1,4 @@
+import { AxiosInstance } from 'axios';
 export interface CallObject {
     id: number;
     result_code: number;
@@ -77,6 +78,7 @@ export interface MessagePayloadItem {
     file_size?: number;
 }
 export default class VoximplantKit {
+    private isTest;
     private requestData;
     private responseData;
     private accessToken;
@@ -90,7 +92,8 @@ export default class VoximplantKit {
     incomingMessage: MessageObject;
     replyMessage: MessageObject;
     api: any;
-    constructor(context: ContextObject);
+    http: AxiosInstance;
+    constructor(context: ContextObject, isTest?: boolean);
     getResponseBody(data: any): any;
     getIncomingMessage(): MessageObject;
     setAccessToken(token: any): void;
@@ -102,7 +105,7 @@ export default class VoximplantKit {
     transferToQueue(queue: QueueInfo): boolean;
     cancelTransferToQueue(): boolean;
     private loadDB(db_name);
-    sendMessage(from: string, to: string, message: string): void;
+    sendMessage(from: string, to: string, message: string): any;
     getAccountInfo(): any;
     addPhoto(url: any): boolean;
 }

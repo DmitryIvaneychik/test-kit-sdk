@@ -1,3 +1,4 @@
+import axios, {AxiosInstance} from 'axios'
 import api from "./api"
 
 const EVENT_TYPES = {
@@ -97,6 +98,7 @@ export interface MessagePayloadItem {
 }
 
 export default class VoximplantKit {
+    private isTest:boolean = false
     private requestData:any = {}
     private responseData:ResponseDataObject = {
         VARIABLES:{},
@@ -119,8 +121,11 @@ export default class VoximplantKit {
     // maxSkillLevel:number = 5
 
     api:any
+    http:AxiosInstance
 
-    constructor(context:ContextObject) {
+    constructor(context:ContextObject, isTest:boolean = false) {
+        this.isTest = isTest
+        this.http = axios
         // Store request data
         this.requestData = context.request.body
         // Get event type
@@ -143,7 +148,7 @@ export default class VoximplantKit {
             SKILLS: []
         }
 
-        this.api = new api(this.domain, this.accessToken)
+        this.api = new api(this.domain, this.accessToken, this.isTest)
 
         if (this.eventType === EVENT_TYPES.incoming_message) {
             this.incomingMessage = this.getIncomingMessage()
@@ -253,7 +258,11 @@ export default class VoximplantKit {
 
     // Send message
     sendMessage(from:string, to:string, message:string) {
-
+        return this.api.request("/v2/phone/sendSms", {
+            source: from,
+            destination: to,
+            sms_body: message
+        })
     }
 
     getAccountInfo() {

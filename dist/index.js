@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const axios_1 = require("axios");
 const api_1 = require("./api");
 const EVENT_TYPES = {
     in_call_function: "in_call_function",
@@ -7,7 +8,8 @@ const EVENT_TYPES = {
     webhook: "webhook"
 };
 class VoximplantKit {
-    constructor(context) {
+    constructor(context, isTest = false) {
+        this.isTest = false;
         this.requestData = {};
         this.responseData = {
             VARIABLES: {},
@@ -22,6 +24,8 @@ class VoximplantKit {
         this.variables = {};
         this.headers = {};
         this.skills = [];
+        this.isTest = isTest;
+        this.http = axios_1.default;
         // Store request data
         this.requestData = context.request.body;
         // Get event type
@@ -42,7 +46,7 @@ class VoximplantKit {
             VARIABLES: {},
             SKILLS: []
         };
-        this.api = new api_1.default(this.domain, this.accessToken);
+        this.api = new api_1.default(this.domain, this.accessToken, this.isTest);
         if (this.eventType === EVENT_TYPES.incoming_message) {
             this.incomingMessage = this.getIncomingMessage();
             this.replyMessage.type = this.incomingMessage.type;
@@ -145,6 +149,11 @@ class VoximplantKit {
     }
     // Send message
     sendMessage(from, to, message) {
+        return this.api.request("/v2/phone/sendSms", {
+            source: from,
+            destination: to,
+            sms_body: message
+        });
     }
     getAccountInfo() {
         return this.api.request("/v3/account/getAccountInfo");

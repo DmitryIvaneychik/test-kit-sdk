@@ -3,11 +3,10 @@ import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
 export default class api {
     private client:AxiosInstance
 
-    constructor(domain:string, token:string) {
+    constructor(domain:string, token:string, isTest:boolean) {
 
         this.client = axios.create({
-            // baseURL: "https://kit.voximplant.com/api",
-            baseURL: "https://voximplant.xyz/api",
+            baseURL: isTest ? "https://voximplant.xyz/api" : "https://kit.voximplant.com/api",
             method: "POST",
             responseType: "json",
         })
@@ -22,9 +21,10 @@ export default class api {
         });
     }
 
-    request<T, R = AxiosResponse<T>> (requestUrl):Promise<R> {
+    request<T, R = AxiosResponse<T>> (requestUrl, data = {}):Promise<R> {
         return this.client.request({
-            url: requestUrl
+            url: requestUrl,
+            data: data
         })
     }
 }

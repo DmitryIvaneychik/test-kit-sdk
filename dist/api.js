@@ -2,10 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 class api {
-    constructor(domain, token) {
+    constructor(domain, token, isTest) {
         this.client = axios_1.default.create({
-            // baseURL: "https://kit.voximplant.com/api",
-            baseURL: "https://voximplant.xyz/api",
+            baseURL: isTest ? "https://voximplant.xyz/api" : "https://kit.voximplant.com/api",
             method: "POST",
             responseType: "json",
         });
@@ -17,9 +16,10 @@ class api {
             return param;
         });
     }
-    request(requestUrl) {
+    request(requestUrl, data = {}) {
         return this.client.request({
-            url: requestUrl
+            url: requestUrl,
+            data: data
         });
     }
 }
