@@ -170,6 +170,8 @@ export default class VoximplantKit {
             this.conversationDB = function () {
                 this.loadConversationDB("conversation_" + this.incomingMessage.conversation.uuid).then(r => {
                     return JSON.parse(r)
+                }).catch(e => {
+                    return {}
                 })
             }
         }
@@ -177,6 +179,8 @@ export default class VoximplantKit {
         this.functionDB = function () {
             this.loadDB("function_" + this.functionId).then(r => {
                 return JSON.parse(r)
+            }).catch(e => {
+                return {}
             })
         }
     }
@@ -313,8 +317,8 @@ export default class VoximplantKit {
             _dbValue = this.functionDB
         }
 
-        if (type === "conversation") {
-            _dbName = "function_" + this.functionId
+        if (type === "conversation" && this.eventType == EVENT_TYPES.incoming_message) {
+            _dbName = "conversation_" + this.incomingMessage.conversation.uuid
             _dbValue = this.conversationDB
         }
 
