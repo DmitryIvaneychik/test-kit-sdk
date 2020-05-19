@@ -7,6 +7,9 @@ class api {
             baseURL: isTest ? "https://voximplant.xyz/api" : "https://kit.voximplant.com/api",
             method: "POST",
             responseType: "json",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
         });
         this.client.interceptors.request.use((param) => {
             if (typeof param.params === "undefined")
