@@ -17,13 +17,14 @@ class api {
                 param.params = {};
             param.params.domain = domain;
             param.params.access_token = token;
+            param.data = qs_1.default.stringify(param.data);
             return param;
         });
     }
     request(requestUrl, data = {}) {
         return this.client.request({
             url: requestUrl,
-            data: qs_1.default.stringify(data)
+            data: data
         });
     }
 }

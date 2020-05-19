@@ -21,15 +21,16 @@ export default class api {
             param.params.domain = domain
             param.params.access_token = token
 
+            param.data = qs.stringify(param.data)
+
             return param
         });
     }
 
     request<T, R = AxiosResponse<T>> (requestUrl, data = {}):Promise<R> {
-
         return this.client.request({
             url: requestUrl,
-            data: qs.stringify(data)
+            data: data
         })
     }
 }

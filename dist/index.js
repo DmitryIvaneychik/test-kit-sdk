@@ -231,5 +231,8 @@ class VoximplantKit {
         });
         return true;
     }
+    version() {
+        return "0.0.12";
+    }
 }
 exports.default = VoximplantKit;

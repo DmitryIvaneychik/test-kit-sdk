@@ -113,4 +113,5 @@ export default class VoximplantKit {
     sendMessage(from: string, to: string, message: string): any;
     getAccountInfo(): any;
     addPhoto(url: any): boolean;
+    version(): string;
 }
