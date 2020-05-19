@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
-const querystring_1 = require("querystring");
+const qs_1 = require("qs");
 class api {
     constructor(domain, token, isTest) {
         this.client = axios_1.default.create({
@@ -9,7 +9,7 @@ class api {
             method: "POST",
             responseType: "json",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
         this.client.interceptors.request.use((param) => {
@@ -23,7 +23,7 @@ class api {
     request(requestUrl, data = {}) {
         return this.client.request({
             url: requestUrl,
-            data: querystring_1.default.stringify(data)
+            data: qs_1.default.stringify(data)
         });
     }
 }

@@ -1,5 +1,5 @@
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
-import qs from 'querystring'
+import qs from 'qs'
 
 export default class api {
     private client:AxiosInstance
@@ -11,7 +11,7 @@ export default class api {
             method: "POST",
             responseType: "json",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                'Content-Type': 'application/x-www-form-urlencoded'
             }
         })
 
@@ -26,6 +26,7 @@ export default class api {
     }
 
     request<T, R = AxiosResponse<T>> (requestUrl, data = {}):Promise<R> {
+
         return this.client.request({
             url: requestUrl,
             data: qs.stringify(data)
