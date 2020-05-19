@@ -1,5 +1,5 @@
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
-import qs from 'qs'
+import {qs} from 'qs'
 
 export default class api {
     private client:AxiosInstance
