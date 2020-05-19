@@ -288,6 +288,8 @@ export default class VoximplantKit {
             key: db_name
         }).then((response) => {
             return response.data
+        }).catch(e => {
+            return {}
         })
     }
 
@@ -297,6 +299,8 @@ export default class VoximplantKit {
             ttl: -1
         }).then((response) => {
             return response.data
+        }).catch(e => {
+            return {}
         })
     }
 
@@ -316,7 +320,7 @@ export default class VoximplantKit {
 
         if (_dbName === null) return false
 
-        this.saveDB(_dbName, JSON.stringify(_dbValue))
+        this.saveDB(_dbName, JSON.stringify(_dbValue)).then(e => {}).catch(e => {})
 
         return true
     }
