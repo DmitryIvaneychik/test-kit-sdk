@@ -355,6 +355,6 @@ export default class VoximplantKit {
     }
 
     version() {
-        return "0.0.13"
+        return "0.0.14"
     }
 }

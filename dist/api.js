@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
-const qs_1 = require("qs");
+const qs = require("qs");
 class api {
     constructor(domain, token, isTest) {
         this.client = axios_1.default.create({
@@ -13,11 +13,11 @@ class api {
             }
         });
         this.client.interceptors.request.use((param) => {
+            param.data = qs.stringify(param.data);
             if (typeof param.params === "undefined")
                 param.params = {};
             param.params.domain = domain;
             param.params.access_token = token;
-            param.data = qs_1.qs.stringify(param.data);
             return param;
         });
     }

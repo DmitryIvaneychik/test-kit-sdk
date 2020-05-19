@@ -1,5 +1,5 @@
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
-import {qs} from 'qs'
+import * as qs from 'qs'
 
 export default class api {
     private client:AxiosInstance
@@ -16,12 +16,11 @@ export default class api {
         })
 
         this.client.interceptors.request.use((param: AxiosRequestConfig) => {
+            param.data = qs.stringify(param.data)
             if (typeof param.params === "undefined") param.params = {}
 
             param.params.domain = domain
             param.params.access_token = token
-
-            param.data = qs.stringify(param.data)
 
             return param
         });
