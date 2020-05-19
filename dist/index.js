@@ -19,11 +19,15 @@ class VoximplantKit {
         this.accessToken = null;
         this.sessionAccessUrl = null;
         this.domain = null;
+        this.functionId = null;
         this.eventType = EVENT_TYPES.webhook;
         this.call = null;
         this.variables = {};
         this.headers = {};
         this.skills = [];
+        // maxSkillLevel:number = 5
+        this.conversationDB = {};
+        this.functionDB = {};
         this.isTest = isTest;
         this.http = axios_1.default;
         // Store request data
@@ -34,6 +38,8 @@ class VoximplantKit {
         this.accessToken = (typeof context.request.headers["x-kit-access-token"] !== "undefined") ? context.request.headers["x-kit-access-token"] : "";
         // Get domain
         this.domain = (typeof context.request.headers["x-kit-domain"] !== "undefined") ? context.request.headers["x-kit-domain"] : "annaclover";
+        // Get function ID
+        this.functionId = (typeof context.request.headers["x-kit-function-id"] !== "undefined") ? context.request.headers["x-kit-function-id"] : 88;
         // Get session access url
         this.sessionAccessUrl = (typeof context.request.headers["x-kit-session-access-url"] !== "undefined") ? context.request.headers["x-kit-session-access-url"] : "";
         // Store call data
@@ -56,8 +62,28 @@ class VoximplantKit {
                 type: "properties",
                 message_type: "text"
             });
+            this.conversationDB = function () {
+                this.loadConversationDB("conversation_" + this.incomingMessage.conversation.uuid).then(r => {
+                    return JSON.parse(r);
+                });
+            };
         }
+        this.functionDB = function () {
+            this.loadDB("function_" + this.functionId).then(r => {
+                return JSON.parse(r);
+            });
+        };
     }
+    /*async loadDBs() {
+
+        let _DBs = [];
+
+        if (this.eventType === EVENT_TYPES.incoming_message) {
+            _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation.uuid))
+        }
+
+        this.api.all(_DBs)
+    }*/
     // Get function response
     getResponseBody(data) {
         if (this.eventType === EVENT_TYPES.in_call_function)
@@ -146,6 +172,35 @@ class VoximplantKit {
         return true;
     }
     loadDB(db_name) {
+        return this.api.request("/v2/kv/get", {
+            key: db_name
+        }).then((response) => {
+            return response.data;
+        });
+    }
+    saveDB(db_name, value) {
+        return this.api.request("/v2/kv/put", {
+            key: db_name,
+            ttl: -1
+        }).then((response) => {
+            return response.data;
+        });
+    }
+    saveDb(type) {
+        let _dbName = null;
+        let _dbValue = null;
+        if (type === "function") {
+            _dbName = "function_" + this.functionId;
+            _dbValue = this.functionDB;
+        }
+        if (type === "conversation") {
+            _dbName = "function_" + this.functionId;
+            _dbValue = this.conversationDB;
+        }
+        if (_dbName === null)
+            return false;
+        this.saveDB(_dbName, JSON.stringify(_dbValue));
+        return true;
     }
     // Send message
     sendMessage(from, to, message) {
@@ -153,10 +208,10 @@ class VoximplantKit {
             source: from,
             destination: to,
             sms_body: message
-        });
+        }).then(r => { return r.data; });
     }
     getAccountInfo() {
-        return this.api.request("/v3/account/getAccountInfo");
+        return this.api.request("/v3/account/getAccountInfo").then(r => { return r.data; });
     }
     // Add photo
     addPhoto(url) {

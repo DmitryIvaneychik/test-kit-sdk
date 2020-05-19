@@ -1,5 +1,6 @@
 import axios, {AxiosInstance} from 'axios'
 import api from "./api"
+import setPrototypeOf = Reflect.setPrototypeOf;
 
 const EVENT_TYPES = {
     in_call_function: "in_call_function",
@@ -109,6 +110,7 @@ export default class VoximplantKit {
     private accessToken:string = null
     private sessionAccessUrl:string = null
     private domain:string = null
+    private functionId:number = null
 
     eventType:string = EVENT_TYPES.webhook
     call:CallObject = null
@@ -119,6 +121,9 @@ export default class VoximplantKit {
     incomingMessage:MessageObject
     replyMessage:MessageObject
     // maxSkillLevel:number = 5
+
+    conversationDB:any = {}
+    functionDB:any = {}
 
     api:any
     http:AxiosInstance
@@ -134,6 +139,8 @@ export default class VoximplantKit {
         this.accessToken = (typeof context.request.headers["x-kit-access-token"] !== "undefined") ?  context.request.headers["x-kit-access-token"] : ""
         // Get domain
         this.domain = (typeof context.request.headers["x-kit-domain"] !== "undefined") ?  context.request.headers["x-kit-domain"] : "annaclover"
+        // Get function ID
+        this.functionId = (typeof context.request.headers["x-kit-function-id"] !== "undefined") ?  context.request.headers["x-kit-function-id"] : 88
         // Get session access url
         this.sessionAccessUrl = (typeof context.request.headers["x-kit-session-access-url"] !== "undefined") ?  context.request.headers["x-kit-session-access-url"] : ""
         // Store call data
@@ -159,8 +166,32 @@ export default class VoximplantKit {
                 type: "properties",
                 message_type: "text"
             });
+
+            this.conversationDB = function () {
+                this.loadConversationDB("conversation_" + this.incomingMessage.conversation.uuid).then(r => {
+                    return JSON.parse(r)
+                })
+            }
+        }
+
+        this.functionDB = function () {
+            this.loadDB("function_" + this.functionId).then(r => {
+                return JSON.parse(r)
+            })
         }
     }
+
+    /*async loadDBs() {
+
+        let _DBs = [];
+
+        if (this.eventType === EVENT_TYPES.incoming_message) {
+            _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation.uuid))
+        }
+
+        this.api.all(_DBs)
+    }*/
+
     // Get function response
     getResponseBody(data:any) {
         if (this.eventType === EVENT_TYPES.in_call_function)
@@ -253,7 +284,41 @@ export default class VoximplantKit {
     }
 
     private loadDB(db_name:string) {
+        return this.api.request("/v2/kv/get", {
+            key: db_name
+        }).then((response) => {
+            return response.data
+        })
+    }
 
+    private saveDB(db_name:string, value:string) {
+        return this.api.request("/v2/kv/put", {
+            key: db_name,
+            ttl: -1
+        }).then((response) => {
+            return response.data
+        })
+    }
+
+    saveDb(type:string) {
+        let _dbName = null
+        let _dbValue = null
+
+        if (type === "function") {
+            _dbName = "function_" + this.functionId
+            _dbValue = this.functionDB
+        }
+
+        if (type === "conversation") {
+            _dbName = "function_" + this.functionId
+            _dbValue = this.conversationDB
+        }
+
+        if (_dbName === null) return false
+
+        this.saveDB(_dbName, JSON.stringify(_dbValue))
+
+        return true
     }
 
     // Send message
@@ -262,11 +327,11 @@ export default class VoximplantKit {
             source: from,
             destination: to,
             sms_body: message
-        })
+        }).then(r => { return r.data })
     }
 
     getAccountInfo() {
-        return this.api.request("/v3/account/getAccountInfo")
+        return this.api.request("/v3/account/getAccountInfo").then(r => { return r.data })
     }
 
     // Add photo

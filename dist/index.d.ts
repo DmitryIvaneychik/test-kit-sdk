@@ -84,6 +84,7 @@ export default class VoximplantKit {
     private accessToken;
     private sessionAccessUrl;
     private domain;
+    private functionId;
     eventType: string;
     call: CallObject;
     variables: object;
@@ -91,6 +92,8 @@ export default class VoximplantKit {
     skills: Array<SkillObject>;
     incomingMessage: MessageObject;
     replyMessage: MessageObject;
+    conversationDB: any;
+    functionDB: any;
     api: any;
     http: AxiosInstance;
     constructor(context: ContextObject, isTest?: boolean);
@@ -105,6 +108,8 @@ export default class VoximplantKit {
     transferToQueue(queue: QueueInfo): boolean;
     cancelTransferToQueue(): boolean;
     private loadDB(db_name);
+    private saveDB(db_name, value);
+    saveDb(type: string): boolean;
     sendMessage(from: string, to: string, message: string): any;
     getAccountInfo(): any;
     addPhoto(url: any): boolean;
