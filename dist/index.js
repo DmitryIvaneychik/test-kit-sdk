@@ -221,6 +221,9 @@ class VoximplantKit {
     getAccountInfo() {
         return this.api.request("/v3/account/getAccountInfo").then(r => { return r.data; });
     }
+    apiProxy(url, data) {
+        return this.api.request(url, data).then(r => { return r.data; });
+    }
     // Add photo
     addPhoto(url) {
         this.replyMessage.payload.push({
@@ -232,7 +235,7 @@ class VoximplantKit {
         return true;
     }
     version() {
-        return "0.0.14";
+        return "0.0.15";
     }
 }
 exports.default = VoximplantKit;

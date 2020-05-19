@@ -112,6 +112,7 @@ export default class VoximplantKit {
     saveDb(type: string): boolean;
     sendMessage(from: string, to: string, message: string): any;
     getAccountInfo(): any;
+    apiProxy(url: string, data: any): any;
     addPhoto(url: any): boolean;
     version(): string;
 }

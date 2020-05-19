@@ -342,6 +342,10 @@ export default class VoximplantKit {
         return this.api.request("/v3/account/getAccountInfo").then(r => { return r.data })
     }
 
+    apiProxy(url:string, data:any) {
+        return this.api.request(url, data).then(r => { return r.data })
+    }
+
     // Add photo
     addPhoto(url) {
         this.replyMessage.payload.push({
@@ -355,6 +359,6 @@ export default class VoximplantKit {
     }
 
     version() {
-        return "0.0.14"
+        return "0.0.15"
     }
 }
