@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
+const querystring_1 = require("querystring");
 class api {
     constructor(domain, token, isTest) {
         this.client = axios_1.default.create({
@@ -22,7 +23,7 @@ class api {
     request(requestUrl, data = {}) {
         return this.client.request({
             url: requestUrl,
-            data: data
+            data: querystring_1.default.stringify(data)
         });
     }
 }

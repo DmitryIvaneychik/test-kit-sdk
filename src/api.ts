@@ -1,4 +1,5 @@
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
+import qs from 'querystring'
 
 export default class api {
     private client:AxiosInstance
@@ -27,7 +28,7 @@ export default class api {
     request<T, R = AxiosResponse<T>> (requestUrl, data = {}):Promise<R> {
         return this.client.request({
             url: requestUrl,
-            data: data
+            data: qs.stringify(data)
         })
     }
 }

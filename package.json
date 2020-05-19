@@ -1,6 +1,6 @@
 {
   "name": "voximplant-kit-sdk",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Voximplant Kit clound functions client",
   "main": "dist/index.js",
   "typescript": {
@@ -21,6 +21,7 @@
   "author": "Ivaneychik Dmitry",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.2"
+    "axios": "^0.19.2",
+    "querystring": "^0.2.0"
   }
 }
