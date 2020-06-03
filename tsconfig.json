@@ -3,7 +3,10 @@
     "outDir": "dist",
     "rootDir": "src",
     // "allowJs": true,
-    "lib": ["ES2018"],
+    "lib": [
+      "ES2018",
+      "dom"
+    ],
     "module": "commonjs",
     "target": "ES2018",
     "noImplicitAny": false,

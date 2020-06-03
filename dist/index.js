@@ -28,8 +28,16 @@ class VoximplantKit {
         // maxSkillLevel:number = 5
         this.conversationDB = {};
         this.functionDB = {};
+        this.accountDB = {};
+        this.db = {};
         this.isTest = isTest;
         this.http = axios_1.default;
+        if (typeof context.request === "undefined") {
+            context.request = {
+                body: {},
+                headers: {}
+            };
+        }
         // Store request data
         this.requestData = context.request.body;
         // Get event type
@@ -62,32 +70,29 @@ class VoximplantKit {
                 type: "properties",
                 message_type: "text"
             });
-            this.conversationDB = function () {
-                this.loadConversationDB("conversation_" + this.incomingMessage.conversation.uuid).then(r => {
-                    return JSON.parse(r);
-                }).catch(e => {
-                    return {};
-                });
-            };
         }
-        this.functionDB = function () {
-            this.loadDB("function_" + this.functionId).then(r => {
-                return JSON.parse(r);
-            }).catch(e => {
-                return {};
-            });
-        };
     }
-    /*async loadDBs() {
-
-        let _DBs = [];
-
+    // load Databases
+    async loadDatabases() {
+        let _this = this;
+        let _DBs = [
+            this.loadDB("function_" + this.functionId),
+            this.loadDB("accountdb_" + this.domain)
+        ];
         if (this.eventType === EVENT_TYPES.incoming_message) {
-            _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation.uuid))
+            _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation.uuid));
         }
-
-        this.api.all(_DBs)
-    }*/
+        await axios_1.default.all(_DBs).then(axios_1.default.spread((func, acc, conv) => {
+            _this.functionDB = (typeof func !== "undefined" && typeof func.result !== "undefined" && func.result !== null) ? JSON.parse(func.result) : {};
+            _this.accountDB = (typeof acc !== "undefined" && typeof acc.result !== "undefined" && acc.result !== null) ? JSON.parse(acc.result) : {};
+            _this.conversationDB = (typeof conv !== "undefined" && typeof acc.result !== "undefined" && acc.result !== null) ? JSON.parse(conv.result) : {};
+            _this.db = {
+                function: _this.functionDB,
+                global: _this.accountDB,
+                conversation: _this.conversationDB
+            };
+        }));
+    }
     // Get function response
     getResponseBody(data) {
         if (this.eventType === EVENT_TYPES.in_call_function)
@@ -105,6 +110,14 @@ class VoximplantKit {
     // Set auth token
     setAccessToken(token) {
         this.accessToken = token;
+    }
+    // Get Variable
+    getVariable(name) {
+        return (typeof this.variables[name] !== "undefined") ? this.variables[name] : null;
+    }
+    // Set variable
+    setVariable(name, value) {
+        this.variables[name] = value;
     }
     // Get all call data
     getCallData() {
@@ -187,6 +200,7 @@ class VoximplantKit {
     saveDB(db_name, value) {
         return this.api.request("/v2/kv/put", {
             key: db_name,
+            value: value,
             ttl: -1
         }).then((response) => {
             return response.data;
@@ -194,6 +208,7 @@ class VoximplantKit {
             return {};
         });
     }
+    // Save DB by scope name
     saveDb(type) {
         let _dbName = null;
         let _dbValue = null;
@@ -201,26 +216,53 @@ class VoximplantKit {
             _dbName = "function_" + this.functionId;
             _dbValue = this.functionDB;
         }
+        if (type === "account") {
+            _dbName = "accountdb_" + this.domain;
+            _dbValue = this.accountDB;
+        }
         if (type === "conversation" && this.eventType == EVENT_TYPES.incoming_message) {
             _dbName = "conversation_" + this.incomingMessage.conversation.uuid;
             _dbValue = this.conversationDB;
         }
         if (_dbName === null)
             return false;
-        this.saveDB(_dbName, JSON.stringify(_dbValue)).then(e => { }).catch(e => { });
-        return true;
+        return this.saveDB(_dbName, JSON.stringify(_dbValue));
     }
-    // Send message
-    sendMessage(from, to, message) {
+    // Get value from DB by key
+    dbGet(key, scope = "global") {
+        return this.db[scope];
+    }
+    // Set value in DB by key
+    dbSet(key, value, scope = "global") {
+        this.db[scope][key] = value;
+    }
+    // Get all DB scope by name
+    dbGetAll(scope = "global") {
+        return typeof this.db[scope] !== "undefined" ? this.db[scope] : null;
+    }
+    // Commit DB chnges
+    async dbCommit() {
+        let _this = this;
+        let _DBs = [
+            this.saveDB("function_" + this.functionId, JSON.stringify(this.db.function)),
+            this.saveDB("accountdb_" + this.domain, JSON.stringify(this.db.global))
+        ];
+        if (this.eventType === EVENT_TYPES.incoming_message) {
+            _DBs.push(this.saveDB("conversation_" + this.incomingMessage.conversation.uuid, JSON.stringify(this.db.conversation)));
+        }
+        await axios_1.default.all(_DBs).then(axios_1.default.spread((func, acc, conv) => {
+            console.log("result", func, acc, conv);
+        }));
+    }
+    // Send SMS message
+    sendSMS(from, to, message) {
         return this.api.request("/v2/phone/sendSms", {
             source: from,
             destination: to,
             sms_body: message
         }).then(r => { return r.data; });
     }
-    getAccountInfo() {
-        return this.api.request("/v3/account/getAccountInfo").then(r => { return r.data; });
-    }
+    // Voximplant Kit API proxy
     apiProxy(url, data) {
         return this.api.request(url, data).then(r => { return r.data; });
     }
@@ -234,6 +276,7 @@ class VoximplantKit {
         });
         return true;
     }
+    // Client version
     version() {
         return "0.0.15";
     }

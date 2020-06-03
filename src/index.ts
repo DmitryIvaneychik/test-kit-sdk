@@ -122,8 +122,10 @@ export default class VoximplantKit {
     replyMessage:MessageObject
     // maxSkillLevel:number = 5
 
-    conversationDB:any = {}
-    functionDB:any = {}
+    private conversationDB:any = {}
+    private functionDB:any = {}
+    private accountDB:any = {}
+    private db:any = {}
 
     api:any
     http:AxiosInstance
@@ -131,6 +133,14 @@ export default class VoximplantKit {
     constructor(context:ContextObject, isTest:boolean = false) {
         this.isTest = isTest
         this.http = axios
+
+        if (typeof context.request === "undefined") {
+            context.request = {
+                body: {},
+                headers: {}
+            }
+        }
+
         // Store request data
         this.requestData = context.request.body
         // Get event type
@@ -166,35 +176,32 @@ export default class VoximplantKit {
                 type: "properties",
                 message_type: "text"
             });
-
-            this.conversationDB = function () {
-                this.loadConversationDB("conversation_" + this.incomingMessage.conversation.uuid).then(r => {
-                    return JSON.parse(r)
-                }).catch(e => {
-                    return {}
-                })
-            }
-        }
-
-        this.functionDB = function () {
-            this.loadDB("function_" + this.functionId).then(r => {
-                return JSON.parse(r)
-            }).catch(e => {
-                return {}
-            })
         }
     }
 
-    /*async loadDBs() {
-
-        let _DBs = [];
+    // load Databases
+    async loadDatabases() {
+        let _this = this
+        let _DBs = [
+            this.loadDB("function_" + this.functionId),
+            this.loadDB("accountdb_" + this.domain)
+        ];
 
         if (this.eventType === EVENT_TYPES.incoming_message) {
             _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation.uuid))
         }
 
-        this.api.all(_DBs)
-    }*/
+        await axios.all(_DBs).then(axios.spread( (func, acc, conv?) => {
+            _this.functionDB = (typeof func !== "undefined" && typeof func.result !== "undefined" && func.result !== null) ? JSON.parse(func.result) : {}
+            _this.accountDB = (typeof acc !== "undefined" && typeof acc.result !== "undefined" && acc.result !== null) ? JSON.parse(acc.result) : {}
+            _this.conversationDB = (typeof conv !== "undefined" && typeof acc.result !== "undefined" && acc.result !== null) ? JSON.parse(conv.result) : {}
+            _this.db = {
+                function: _this.functionDB,
+                global: _this.accountDB,
+                conversation: _this.conversationDB
+            }
+        }))
+    }
 
     // Get function response
     getResponseBody(data:any) {
@@ -216,14 +223,27 @@ export default class VoximplantKit {
     setAccessToken(token){
         this.accessToken = token
     }
+
+    // Get Variable
+    getVariable(name:string){
+        return (typeof this.variables[name] !== "undefined") ? this.variables[name] : null
+    }
+
+    // Set variable
+    setVariable(name, value){
+        this.variables[name] = value
+    }
+
     // Get all call data
     getCallData(){
         return (typeof this.requestData.CALL !== "undefined") ? this.requestData.CALL : null
     }
+
     // Get all variables
     getVariables(){
         return (typeof this.requestData.VARIABLES !== "undefined") ? this.requestData.VARIABLES : {}
     }
+
     // Get all skills
     getSkills(){
         return (typeof this.requestData.SKILLS !== "undefined") ? this.requestData.SKILLS : []
@@ -240,6 +260,7 @@ export default class VoximplantKit {
         })
         else this.skills[skillIndex].level = level
     }
+
     // Remove skill
     removeSkill(name:string){
         const skillIndex = this.skills.findIndex(skill => {
@@ -300,6 +321,7 @@ export default class VoximplantKit {
     private saveDB(db_name:string, value:string) {
         return this.api.request("/v2/kv/put", {
             key: db_name,
+            value: value,
             ttl: -1
         }).then((response) => {
             return response.data
@@ -308,13 +330,19 @@ export default class VoximplantKit {
         })
     }
 
-    saveDb(type:string) {
+    // Save DB by scope name
+    private saveDb(type:string) {
         let _dbName = null
         let _dbValue = null
 
         if (type === "function") {
             _dbName = "function_" + this.functionId
             _dbValue = this.functionDB
+        }
+
+        if (type === "account") {
+            _dbName = "accountdb_" + this.domain
+            _dbValue = this.accountDB
         }
 
         if (type === "conversation" && this.eventType == EVENT_TYPES.incoming_message) {
@@ -324,13 +352,43 @@ export default class VoximplantKit {
 
         if (_dbName === null) return false
 
-        this.saveDB(_dbName, JSON.stringify(_dbValue)).then(e => {}).catch(e => {})
-
-        return true
+        return this.saveDB(_dbName, JSON.stringify(_dbValue))
     }
 
-    // Send message
-    sendMessage(from:string, to:string, message:string) {
+    // Get value from DB by key
+    dbGet(key:string, scope:string = "global"):any {
+        return this.db[scope]
+    }
+
+    // Set value in DB by key
+    dbSet(key:string, value:any, scope:string = "global"):void {
+        this.db[scope][key] = value
+    }
+
+    // Get all DB scope by name
+    dbGetAll(scope:string = "global") {
+        return typeof this.db[scope] !== "undefined" ? this.db[scope] : null
+    }
+
+    // Commit DB chnges
+    async dbCommit() {
+        let _this = this
+        let _DBs = [
+            this.saveDB("function_" + this.functionId, JSON.stringify(this.db.function)),
+            this.saveDB("accountdb_" + this.domain, JSON.stringify(this.db.global))
+        ];
+
+        if (this.eventType === EVENT_TYPES.incoming_message) {
+            _DBs.push(this.saveDB("conversation_" + this.incomingMessage.conversation.uuid, JSON.stringify(this.db.conversation)))
+        }
+
+        await axios.all(_DBs).then(axios.spread( (func, acc, conv?) => {
+            console.log("result", func, acc, conv)
+        }))
+    }
+
+    // Send SMS message
+    sendSMS(from:string, to:string, message:string) {
         return this.api.request("/v2/phone/sendSms", {
             source: from,
             destination: to,
@@ -338,10 +396,7 @@ export default class VoximplantKit {
         }).then(r => { return r.data })
     }
 
-    getAccountInfo() {
-        return this.api.request("/v3/account/getAccountInfo").then(r => { return r.data })
-    }
-
+    // Voximplant Kit API proxy
     apiProxy(url:string, data:any) {
         return this.api.request(url, data).then(r => { return r.data })
     }
@@ -358,6 +413,7 @@ export default class VoximplantKit {
         return true
     }
 
+    // Client version
     version() {
         return "0.0.15"
     }
