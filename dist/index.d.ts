@@ -31,6 +31,8 @@ export interface MessageConversation {
     uuid: string;
     client_id: string;
     custom_data: ConversationCustomDataObject;
+    current_status: string;
+    current_request: IncomingRequestObject;
 }
 export interface ConversationCustomDataObject {
     client_data: ConversationCustomDataClientDataObject;
@@ -114,7 +116,7 @@ export default class VoximplantKit {
     variables: object;
     headers: object;
     skills: Array<SkillObject>;
-    incomingMessage: IncomingMessageObject;
+    incomingMessage: MessageObject;
     replyMessage: MessageObject;
     private conversationDB;
     private functionDB;
@@ -125,7 +127,7 @@ export default class VoximplantKit {
     constructor(context: ContextObject, isTest?: boolean);
     loadDatabases(): Promise<void>;
     getResponseBody(data: any): any;
-    getIncomingMessage(): IncomingMessageObject;
+    getIncomingMessage(): MessageObject;
     setAccessToken(token: any): void;
     getVariable(name: string): any;
     setVariable(name: any, value: any): void;

@@ -28,30 +28,41 @@ class VoximplantKit {
         this.incomingMessage = {
             text: null,
             type: null,
-            conversation_uuid: null,
-            client_data: {
-                client_id: null,
-                client_avatar: null,
-                client_display_name: null,
-                client_phone: null
+            sender: {
+                is_bot: null
             },
-            conversation_data: {
-                last_message_text: null,
-                last_message_time: null,
-                channel_type: null,
-                last_message_sender_type: null,
-                is_read: null
-            },
-            current_request: {
+            conversation: {
                 id: null,
-                start_sequence: null,
-                end_sequence: null,
-                start_time: null,
-                handling_start_time: null,
-                end_time: null,
-                completed: null,
-                conversation_id: null
-            }
+                uuid: null,
+                client_id: null,
+                custom_data: {
+                    conversation_data: {
+                        last_message_text: null,
+                        last_message_time: null,
+                        channel_type: null,
+                        last_message_sender_type: null,
+                        is_read: null
+                    },
+                    client_data: {
+                        client_id: null,
+                        client_avatar: null,
+                        client_display_name: null,
+                        client_phone: null
+                    }
+                },
+                current_status: null,
+                current_request: {
+                    id: null,
+                    start_sequence: null,
+                    end_sequence: null,
+                    start_time: null,
+                    handling_start_time: null,
+                    end_time: null,
+                    completed: null,
+                    conversation_id: null
+                }
+            },
+            payload: []
         };
         this.replyMessage = {
             text: null,
@@ -64,19 +75,30 @@ class VoximplantKit {
                 uuid: null,
                 client_id: null,
                 custom_data: {
-                    client_data: {
-                        client_id: null,
-                        client_phone: null,
-                        client_avatar: null,
-                        client_display_name: null
-                    },
                     conversation_data: {
                         last_message_text: null,
                         last_message_time: null,
                         channel_type: null,
                         last_message_sender_type: null,
                         is_read: null
+                    },
+                    client_data: {
+                        client_id: null,
+                        client_avatar: null,
+                        client_display_name: null,
+                        client_phone: null
                     }
+                },
+                current_status: null,
+                current_request: {
+                    id: null,
+                    start_sequence: null,
+                    end_sequence: null,
+                    start_time: null,
+                    handling_start_time: null,
+                    end_time: null,
+                    completed: null,
+                    conversation_id: null
                 }
             },
             payload: []
@@ -136,7 +158,7 @@ class VoximplantKit {
             this.loadDB("accountdb_" + this.domain)
         ];
         if (this.eventType === EVENT_TYPES.incoming_message) {
-            _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation_uuid));
+            _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation.uuid));
         }
         await axios_1.default.all(_DBs).then(axios_1.default.spread((func, acc, conv) => {
             _this.functionDB = (typeof func !== "undefined" && typeof func.result !== "undefined" && func.result !== null) ? JSON.parse(func.result) : {};
@@ -166,14 +188,7 @@ class VoximplantKit {
     }
     // Get incoming message
     getIncomingMessage() {
-        return {
-            text: this.requestData.text,
-            type: this.requestData.type,
-            conversation_uuid: this.requestData.conversation.uuid,
-            client_data: this.requestData.conversation.custom_data.client_data,
-            conversation_data: this.requestData.conversation.custom_data.conversation_data,
-            current_request: this.requestData.current_request
-        };
+        return this.requestData;
     }
     // Set auth token
     setAccessToken(token) {
@@ -314,7 +329,7 @@ class VoximplantKit {
             _dbValue = this.accountDB;
         }
         if (type === "conversation" && this.eventType == EVENT_TYPES.incoming_message) {
-            _dbName = "conversation_" + this.incomingMessage.conversation_uuid;
+            _dbName = "conversation_" + this.incomingMessage.conversation.uuid;
             _dbValue = this.conversationDB;
         }
         if (_dbName === null)
@@ -341,7 +356,7 @@ class VoximplantKit {
             this.saveDB("accountdb_" + this.domain, JSON.stringify(this.db.global))
         ];
         if (this.eventType === EVENT_TYPES.incoming_message) {
-            _DBs.push(this.saveDB("conversation_" + this.incomingMessage.conversation_uuid, JSON.stringify(this.db.conversation)));
+            _DBs.push(this.saveDB("conversation_" + this.incomingMessage.conversation.uuid, JSON.stringify(this.db.conversation)));
         }
         await axios_1.default.all(_DBs).then(axios_1.default.spread((func, acc, conv) => {
             console.log("result", func, acc, conv);
@@ -371,7 +386,7 @@ class VoximplantKit {
     }
     // Client version
     version() {
-        return "0.0.22";
+        return "0.0.23";
     }
 }
 exports.default = VoximplantKit;
