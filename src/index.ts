@@ -133,7 +133,34 @@ export default class VoximplantKit {
     skills:Array<SkillObject> = []
 
     incomingMessage:IncomingMessageObject
-    replyMessage:MessageObject
+    replyMessage:MessageObject = {
+        text: '',
+        type: '',
+        sender:{
+            is_bot: true
+        },
+        conversation: {
+            id: null,
+            uuid: '',
+            client_id: '',
+            custom_data: {
+                client_data: {
+                    client_id:null,
+                    client_phone:'',
+                    client_avatar:'',
+                    client_display_name:''
+                },
+                conversation_data: {
+                    last_message_text:'',
+                    last_message_time:null,
+                    channel_type:'',
+                    last_message_sender_type:'',
+                    is_read:false
+                }
+            }
+        },
+        payload: []
+    }
     // maxSkillLevel:number = 5
 
     private conversationDB:any = {}
@@ -182,8 +209,6 @@ export default class VoximplantKit {
         this.api = new api(this.domain, this.accessToken, this.isTest)
 
         if (this.eventType === EVENT_TYPES.incoming_message) {
-            console.log('type', typeof this.requestData)
-            console.log('data', this.requestData)
             this.incomingMessage = this.getIncomingMessage()
             this.replyMessage.type = this.requestData.type
             this.replyMessage.sender.is_bot = true
