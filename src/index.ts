@@ -182,6 +182,8 @@ export default class VoximplantKit {
         this.api = new api(this.domain, this.accessToken, this.isTest)
 
         if (this.eventType === EVENT_TYPES.incoming_message) {
+            console.log('type', typeof this.requestData)
+            console.log('data', this.requestData)
             this.incomingMessage = this.getIncomingMessage()
             this.replyMessage.type = this.requestData.type
             this.replyMessage.sender.is_bot = true
