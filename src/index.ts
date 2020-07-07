@@ -1,6 +1,5 @@
 import axios, {AxiosInstance} from 'axios'
 import api from "./api"
-import setPrototypeOf = Reflect.setPrototypeOf;
 
 const EVENT_TYPES = {
     in_call_function: "in_call_function",
@@ -79,6 +78,21 @@ export interface MessageObject {
     payload:Array<MessagePayloadItem>
 }
 
+export interface IncomingMessageObject {
+    text:string
+    type:string
+    conversation_uuid:string
+    client_data:ConversationCustomDataClientDataObject
+    conversation_data:ConversationCustomDataConversationDataObject
+}
+
+export interface MessageSenderObject {
+    client_id:string
+    client_phone:string
+    client_avatar:string
+    client_display_name:string
+}
+
 export interface MessageSender {
     is_bot:boolean
 }
@@ -118,7 +132,7 @@ export default class VoximplantKit {
     headers:object = {}
     skills:Array<SkillObject> = []
 
-    incomingMessage:MessageObject
+    incomingMessage:IncomingMessageObject
     replyMessage:MessageObject
     // maxSkillLevel:number = 5
 
@@ -169,9 +183,9 @@ export default class VoximplantKit {
 
         if (this.eventType === EVENT_TYPES.incoming_message) {
             this.incomingMessage = this.getIncomingMessage()
-            this.replyMessage.type = this.incomingMessage.type
+            this.replyMessage.type = this.requestData.type
             this.replyMessage.sender.is_bot = true
-            this.replyMessage.conversation = this.incomingMessage.conversation
+            this.replyMessage.conversation = this.requestData.conversation
             this.replyMessage.payload.push({
                 type: "properties",
                 message_type: "text"
@@ -188,7 +202,7 @@ export default class VoximplantKit {
         ];
 
         if (this.eventType === EVENT_TYPES.incoming_message) {
-            _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation.uuid))
+            _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation_uuid))
         }
 
         await axios.all(_DBs).then(axios.spread( (func, acc, conv?) => {
@@ -210,13 +224,21 @@ export default class VoximplantKit {
                 "VARIABLES": this.variables,
                 "SKILLS": this.skills
             }
+        if (this.eventType === EVENT_TYPES.incoming_message)
+            return this.replyMessage
         else
             return data
     }
 
     // Get incoming message
-    getIncomingMessage():MessageObject{
-        return this.requestData
+    getIncomingMessage():IncomingMessageObject{
+        return {
+            text: this.requestData.text,
+            type: this.requestData.type,
+            conversation_uuid: this.requestData.conversation.uuid,
+            client_data: this.requestData.conversation.custom_data.client_data,
+            conversation_data: this.requestData.conversation.custom_data.conversation_data
+        }
     }
 
     // Set auth token
@@ -346,7 +368,7 @@ export default class VoximplantKit {
         }
 
         if (type === "conversation" && this.eventType == EVENT_TYPES.incoming_message) {
-            _dbName = "conversation_" + this.incomingMessage.conversation.uuid
+            _dbName = "conversation_" + this.incomingMessage.conversation_uuid
             _dbValue = this.conversationDB
         }
 
@@ -379,7 +401,7 @@ export default class VoximplantKit {
         ];
 
         if (this.eventType === EVENT_TYPES.incoming_message) {
-            _DBs.push(this.saveDB("conversation_" + this.incomingMessage.conversation.uuid, JSON.stringify(this.db.conversation)))
+            _DBs.push(this.saveDB("conversation_" + this.incomingMessage.conversation_uuid, JSON.stringify(this.db.conversation)))
         }
 
         await axios.all(_DBs).then(axios.spread( (func, acc, conv?) => {

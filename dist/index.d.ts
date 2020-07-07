@@ -60,6 +60,19 @@ export interface MessageObject {
     conversation: MessageConversation;
     payload: Array<MessagePayloadItem>;
 }
+export interface IncomingMessageObject {
+    text: string;
+    type: string;
+    conversation_uuid: string;
+    client_data: ConversationCustomDataClientDataObject;
+    conversation_data: ConversationCustomDataConversationDataObject;
+}
+export interface MessageSenderObject {
+    client_id: string;
+    client_phone: string;
+    client_avatar: string;
+    client_display_name: string;
+}
 export interface MessageSender {
     is_bot: boolean;
 }
@@ -90,7 +103,7 @@ export default class VoximplantKit {
     variables: object;
     headers: object;
     skills: Array<SkillObject>;
-    incomingMessage: MessageObject;
+    incomingMessage: IncomingMessageObject;
     replyMessage: MessageObject;
     private conversationDB;
     private functionDB;
@@ -101,7 +114,7 @@ export default class VoximplantKit {
     constructor(context: ContextObject, isTest?: boolean);
     loadDatabases(): Promise<void>;
     getResponseBody(data: any): any;
-    getIncomingMessage(): MessageObject;
+    getIncomingMessage(): IncomingMessageObject;
     setAccessToken(token: any): void;
     getVariable(name: string): any;
     setVariable(name: any, value: any): void;

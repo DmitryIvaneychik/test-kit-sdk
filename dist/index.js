@@ -63,9 +63,9 @@ class VoximplantKit {
         this.api = new api_1.default(this.domain, this.accessToken, this.isTest);
         if (this.eventType === EVENT_TYPES.incoming_message) {
             this.incomingMessage = this.getIncomingMessage();
-            this.replyMessage.type = this.incomingMessage.type;
+            this.replyMessage.type = this.requestData.type;
             this.replyMessage.sender.is_bot = true;
-            this.replyMessage.conversation = this.incomingMessage.conversation;
+            this.replyMessage.conversation = this.requestData.conversation;
             this.replyMessage.payload.push({
                 type: "properties",
                 message_type: "text"
@@ -80,7 +80,7 @@ class VoximplantKit {
             this.loadDB("accountdb_" + this.domain)
         ];
         if (this.eventType === EVENT_TYPES.incoming_message) {
-            _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation.uuid));
+            _DBs.push(this.loadDB("conversation_" + this.incomingMessage.conversation_uuid));
         }
         await axios_1.default.all(_DBs).then(axios_1.default.spread((func, acc, conv) => {
             _this.functionDB = (typeof func !== "undefined" && typeof func.result !== "undefined" && func.result !== null) ? JSON.parse(func.result) : {};
@@ -100,12 +100,20 @@ class VoximplantKit {
                 "VARIABLES": this.variables,
                 "SKILLS": this.skills
             };
+        if (this.eventType === EVENT_TYPES.incoming_message)
+            return this.replyMessage;
         else
             return data;
     }
     // Get incoming message
     getIncomingMessage() {
-        return this.requestData;
+        return {
+            text: this.requestData.text,
+            type: this.requestData.type,
+            conversation_uuid: this.requestData.conversation.uuid,
+            client_data: this.requestData.conversation.custom_data.client_data,
+            conversation_data: this.requestData.conversation.custom_data.conversation_data
+        };
     }
     // Set auth token
     setAccessToken(token) {
@@ -221,7 +229,7 @@ class VoximplantKit {
             _dbValue = this.accountDB;
         }
         if (type === "conversation" && this.eventType == EVENT_TYPES.incoming_message) {
-            _dbName = "conversation_" + this.incomingMessage.conversation.uuid;
+            _dbName = "conversation_" + this.incomingMessage.conversation_uuid;
             _dbValue = this.conversationDB;
         }
         if (_dbName === null)
@@ -248,7 +256,7 @@ class VoximplantKit {
             this.saveDB("accountdb_" + this.domain, JSON.stringify(this.db.global))
         ];
         if (this.eventType === EVENT_TYPES.incoming_message) {
-            _DBs.push(this.saveDB("conversation_" + this.incomingMessage.conversation.uuid, JSON.stringify(this.db.conversation)));
+            _DBs.push(this.saveDB("conversation_" + this.incomingMessage.conversation_uuid, JSON.stringify(this.db.conversation)));
         }
         await axios_1.default.all(_DBs).then(axios_1.default.spread((func, acc, conv) => {
             console.log("result", func, acc, conv);
