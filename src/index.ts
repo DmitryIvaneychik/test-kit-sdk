@@ -84,6 +84,18 @@ export interface IncomingMessageObject {
     conversation_uuid:string
     client_data:ConversationCustomDataClientDataObject
     conversation_data:ConversationCustomDataConversationDataObject
+    current_request:IncomingRequestObject
+}
+
+export interface IncomingRequestObject {
+    id:number
+    conversation_id:number
+    start_sequence:number
+    end_sequence:number
+    start_time:number
+    handling_start_time:number
+    end_time:number
+    completed:boolean
 }
 
 export interface MessageSenderObject {
@@ -267,7 +279,8 @@ export default class VoximplantKit {
             type: this.requestData.type,
             conversation_uuid: this.requestData.conversation.uuid,
             client_data: this.requestData.conversation.custom_data.client_data,
-            conversation_data: this.requestData.conversation.custom_data.conversation_data
+            conversation_data: this.requestData.conversation.custom_data.conversation_data,
+            current_request: this.requestData.current_request
         }
     }
 
@@ -321,6 +334,33 @@ export default class VoximplantKit {
         if (skillIndex > -1) {
             this.skills.splice(skillIndex, 1)
         }
+    }
+
+    // Finish current request in conversation
+    finishRequest(){
+        if (this.eventType !== EVENT_TYPES.incoming_message) return false
+        const payloadIndex = this.replyMessage.payload.findIndex(item => {
+            return item.type === "cmd" && item.name === "finish_request"
+        })
+        if (payloadIndex === -1) {
+            this.replyMessage.payload.push({
+                type:"cmd",
+                name:"finish_request"
+            })
+        }
+        return true
+    }
+
+    // Cancel finish current request in conversation
+    cancelFinishRequest(){
+        const payloadIndex = this.replyMessage.payload.findIndex(item => {
+            return item.type === "cmd" && item.name === "finish_request"
+        })
+        if (payloadIndex > -1) {
+            this.replyMessage.payload.splice(payloadIndex, 1)
+        }
+
+        return true
     }
 
     // Transfer to queue
@@ -467,6 +507,6 @@ export default class VoximplantKit {
 
     // Client version
     version() {
-        return "0.0.16"
+        return "0.0.21"
     }
 }
