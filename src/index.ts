@@ -252,7 +252,10 @@ export default class VoximplantKit {
                 "SKILLS": this.skills
             }
         if (this.eventType === EVENT_TYPES.incoming_message)
-            return this.replyMessage
+            return {
+                text: this.replyMessage.text,
+                payload: this.replyMessage.payload
+            }
         else
             return data
     }
