@@ -25,29 +25,57 @@ class VoximplantKit {
         this.variables = {};
         this.headers = {};
         this.skills = [];
+        this.incomingMessage = {
+            text: null,
+            type: null,
+            conversation_uuid: null,
+            client_data: {
+                client_id: null,
+                client_avatar: null,
+                client_display_name: null,
+                client_phone: null
+            },
+            conversation_data: {
+                last_message_text: null,
+                last_message_time: null,
+                channel_type: null,
+                last_message_sender_type: null,
+                is_read: null
+            },
+            current_request: {
+                id: null,
+                start_sequence: null,
+                end_sequence: null,
+                start_time: null,
+                handling_start_time: null,
+                end_time: null,
+                completed: null,
+                conversation_id: null
+            }
+        };
         this.replyMessage = {
-            text: '',
-            type: '',
+            text: null,
+            type: null,
             sender: {
                 is_bot: true
             },
             conversation: {
                 id: null,
-                uuid: '',
-                client_id: '',
+                uuid: null,
+                client_id: null,
                 custom_data: {
                     client_data: {
                         client_id: null,
-                        client_phone: '',
-                        client_avatar: '',
-                        client_display_name: ''
+                        client_phone: null,
+                        client_avatar: null,
+                        client_display_name: null
                     },
                     conversation_data: {
-                        last_message_text: '',
+                        last_message_text: null,
                         last_message_time: null,
-                        channel_type: '',
-                        last_message_sender_type: '',
-                        is_read: false
+                        channel_type: null,
+                        last_message_sender_type: null,
+                        is_read: null
                     }
                 }
             },
@@ -129,7 +157,10 @@ class VoximplantKit {
                 "SKILLS": this.skills
             };
         if (this.eventType === EVENT_TYPES.incoming_message)
-            return this.replyMessage;
+            return {
+                text: this.replyMessage.text,
+                payload: this.replyMessage.payload
+            };
         else
             return data;
     }
@@ -140,7 +171,8 @@ class VoximplantKit {
             type: this.requestData.type,
             conversation_uuid: this.requestData.conversation.uuid,
             client_data: this.requestData.conversation.custom_data.client_data,
-            conversation_data: this.requestData.conversation.custom_data.conversation_data
+            conversation_data: this.requestData.conversation.custom_data.conversation_data,
+            current_request: this.requestData.current_request
         };
     }
     // Set auth token
@@ -188,6 +220,31 @@ class VoximplantKit {
         if (skillIndex > -1) {
             this.skills.splice(skillIndex, 1);
         }
+    }
+    // Finish current request in conversation
+    finishRequest() {
+        if (this.eventType !== EVENT_TYPES.incoming_message)
+            return false;
+        const payloadIndex = this.replyMessage.payload.findIndex(item => {
+            return item.type === "cmd" && item.name === "finish_request";
+        });
+        if (payloadIndex === -1) {
+            this.replyMessage.payload.push({
+                type: "cmd",
+                name: "finish_request"
+            });
+        }
+        return true;
+    }
+    // Cancel finish current request in conversation
+    cancelFinishRequest() {
+        const payloadIndex = this.replyMessage.payload.findIndex(item => {
+            return item.type === "cmd" && item.name === "finish_request";
+        });
+        if (payloadIndex > -1) {
+            this.replyMessage.payload.splice(payloadIndex, 1);
+        }
+        return true;
     }
     // Transfer to queue
     transferToQueue(queue) {
@@ -314,7 +371,7 @@ class VoximplantKit {
     }
     // Client version
     version() {
-        return "0.0.16";
+        return "0.0.22";
     }
 }
 exports.default = VoximplantKit;

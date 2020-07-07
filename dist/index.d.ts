@@ -66,6 +66,17 @@ export interface IncomingMessageObject {
     conversation_uuid: string;
     client_data: ConversationCustomDataClientDataObject;
     conversation_data: ConversationCustomDataConversationDataObject;
+    current_request: IncomingRequestObject;
+}
+export interface IncomingRequestObject {
+    id: number;
+    conversation_id: number;
+    start_sequence: number;
+    end_sequence: number;
+    start_time: number;
+    handling_start_time: number;
+    end_time: number;
+    completed: boolean;
 }
 export interface MessageSenderObject {
     client_id: string;
@@ -123,6 +134,8 @@ export default class VoximplantKit {
     getSkills(): any;
     setSkill(name: string, level: number): void;
     removeSkill(name: string): void;
+    finishRequest(): boolean;
+    cancelFinishRequest(): boolean;
     transferToQueue(queue: QueueInfo): boolean;
     cancelTransferToQueue(): boolean;
     private loadDB(db_name);

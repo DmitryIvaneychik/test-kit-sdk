@@ -144,30 +144,57 @@ export default class VoximplantKit {
     headers:object = {}
     skills:Array<SkillObject> = []
 
-    incomingMessage:IncomingMessageObject
+    incomingMessage:IncomingMessageObject = {
+        text: null,
+        type: null,
+        conversation_uuid: null,
+        client_data:{
+            client_id: null,
+            client_avatar: null,
+            client_display_name: null,
+            client_phone: null
+        },
+        conversation_data: {
+            last_message_text: null,
+            last_message_time: null,
+            channel_type: null,
+            last_message_sender_type: null,
+            is_read:null
+        },
+        current_request: {
+            id:null,
+            start_sequence:null,
+            end_sequence:null,
+            start_time:null,
+            handling_start_time:null,
+            end_time:null,
+            completed:null,
+            conversation_id:null
+        }
+    }
     replyMessage:MessageObject = {
-        text: '',
-        type: '',
+        text: null,
+        type: null,
         sender:{
             is_bot: true
         },
         conversation: {
             id: null,
-            uuid: '',
-            client_id: '',
+            uuid: null,
+            client_id: null,
             custom_data: {
                 client_data: {
                     client_id:null,
-                    client_phone:'',
-                    client_avatar:'',
-                    client_display_name:''
+                    client_phone:null,
+                    client_avatar:null,
+                    client_display_name:null
                 },
                 conversation_data: {
-                    last_message_text:'',
+                    last_message_text:null,
                     last_message_time:null,
-                    channel_type:'',
-                    last_message_sender_type:'',
-                    is_read:false
+                    channel_type:null,
+                    last_message_sender_type:null,
+                    is_read:null
                 }
             }
         },
@@ -507,6 +534,6 @@ export default class VoximplantKit {
 
     // Client version
     version() {
-        return "0.0.21"
+        return "0.0.22"
     }
 }
