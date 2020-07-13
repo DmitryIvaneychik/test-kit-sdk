@@ -116,6 +116,7 @@ export interface MessagePayloadItem {
     message_type?:string
     name?:string
     queue?:QueueInfo
+    skills?:Array<SkillObject>
     text?:string
     url?:string
     latitude?:number
@@ -314,11 +315,20 @@ export default class VoximplantKit {
                 "VARIABLES": this.variables,
                 "SKILLS": this.skills
             }
-        if (this.eventType === EVENT_TYPES.incoming_message)
+        if (this.eventType === EVENT_TYPES.incoming_message) {
+            const payloadIndex = this.replyMessage.payload.findIndex(item => {
+                return item.type === "cmd" && item.name === "transfer_to_queue"
+            })
+
+            if (payloadIndex !== -1) {
+                this.replyMessage.payload[payloadIndex].skills = this.skills
+            }
+
             return {
                 text: this.replyMessage.text,
                 payload: this.replyMessage.payload
             }
+        }
         else
             return data
     }
@@ -425,7 +435,8 @@ export default class VoximplantKit {
             this.replyMessage.payload.push({
                 type:"cmd",
                 name:"transfer_to_queue",
-                queue:queue
+                queue:queue,
+                skills: []
             })
         }
 
@@ -551,6 +562,6 @@ export default class VoximplantKit {
 
     // Client version
     version() {
-        return "0.0.23"
+        return "0.0.24"
     }
 }
