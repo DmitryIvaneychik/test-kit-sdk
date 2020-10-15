@@ -138,6 +138,7 @@ export default class VoximplantKit {
 
     private accessToken:string = null
     private sessionAccessUrl:string = null
+    private apiUrl:string = null
     private domain:string = null
     private functionId:number = null
 
@@ -252,6 +253,8 @@ export default class VoximplantKit {
         this.eventType = (typeof context.request.headers["x-kit-event-type"] !== "undefined") ? context.request.headers["x-kit-event-type"] : EVENT_TYPES.webhook
         // Get access token
         this.accessToken = (typeof context.request.headers["x-kit-access-token"] !== "undefined") ?  context.request.headers["x-kit-access-token"] : ""
+        // Get api url
+        this.apiUrl = (typeof context.request.headers["x-kit-api-url"] !== "undefined") ?  context.request.headers["x-kit-api-url"] : "kitapi-eu.voximplant.com"
         // Get domain
         this.domain = (typeof context.request.headers["x-kit-domain"] !== "undefined") ?  context.request.headers["x-kit-domain"] : "annaclover"
         // Get function ID
@@ -270,7 +273,7 @@ export default class VoximplantKit {
             SKILLS: []
         }
 
-        this.api = new api(this.domain, this.accessToken, this.isTest)
+        this.api = new api(this.domain, this.accessToken, this.isTest, this.apiUrl)
 
         if (this.eventType === EVENT_TYPES.incoming_message) {
             this.incomingMessage = this.getIncomingMessage()
@@ -562,6 +565,6 @@ export default class VoximplantKit {
 
     // Client version
     version() {
-        return "0.0.24"
+        return "0.0.25"
     }
 }

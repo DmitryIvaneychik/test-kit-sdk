@@ -4,10 +4,10 @@ import * as qs from 'qs'
 export default class api {
     private client:AxiosInstance
 
-    constructor(domain:string, token:string, isTest:boolean) {
+    constructor(domain:string, token:string, isTest:boolean, url: string) {
 
         this.client = axios.create({
-            baseURL: isTest ? "https://voximplant.xyz/api" : "https://kit.voximplant.com/api",
+            baseURL: isTest ? "https://voximplant.xyz/api" : `https://${url}/api`,
             method: "POST",
             responseType: "json",
             headers: {
