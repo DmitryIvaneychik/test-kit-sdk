@@ -18,6 +18,7 @@ class VoximplantKit {
         // private responseMessageData:MessageObject = {}
         this.accessToken = null;
         this.sessionAccessUrl = null;
+        this.apiUrl = null;
         this.domain = null;
         this.functionId = null;
         this.eventType = EVENT_TYPES.webhook;
@@ -122,6 +123,8 @@ class VoximplantKit {
         this.eventType = (typeof context.request.headers["x-kit-event-type"] !== "undefined") ? context.request.headers["x-kit-event-type"] : EVENT_TYPES.webhook;
         // Get access token
         this.accessToken = (typeof context.request.headers["x-kit-access-token"] !== "undefined") ? context.request.headers["x-kit-access-token"] : "";
+        // Get api url
+        this.apiUrl = (typeof context.request.headers["x-kit-api-url"] !== "undefined") ? context.request.headers["x-kit-api-url"] : "kitapi-eu.voximplant.com";
         // Get domain
         this.domain = (typeof context.request.headers["x-kit-domain"] !== "undefined") ? context.request.headers["x-kit-domain"] : "annaclover";
         // Get function ID
@@ -138,7 +141,7 @@ class VoximplantKit {
             VARIABLES: {},
             SKILLS: []
         };
-        this.api = new api_1.default(this.domain, this.accessToken, this.isTest);
+        this.api = new api_1.default(this.domain, this.accessToken, this.isTest, this.apiUrl);
         if (this.eventType === EVENT_TYPES.incoming_message) {
             this.incomingMessage = this.getIncomingMessage();
             this.replyMessage.type = this.requestData.type;
@@ -178,11 +181,18 @@ class VoximplantKit {
                 "VARIABLES": this.variables,
                 "SKILLS": this.skills
             };
-        if (this.eventType === EVENT_TYPES.incoming_message)
+        if (this.eventType === EVENT_TYPES.incoming_message) {
+            const payloadIndex = this.replyMessage.payload.findIndex(item => {
+                return item.type === "cmd" && item.name === "transfer_to_queue";
+            });
+            if (payloadIndex !== -1) {
+                this.replyMessage.payload[payloadIndex].skills = this.skills;
+            }
             return {
                 text: this.replyMessage.text,
                 payload: this.replyMessage.payload
             };
+        }
         else
             return data;
     }
@@ -281,7 +291,8 @@ class VoximplantKit {
             this.replyMessage.payload.push({
                 type: "cmd",
                 name: "transfer_to_queue",
-                queue: queue
+                queue: queue,
+                skills: []
             });
         }
         return true;
@@ -386,7 +397,7 @@ class VoximplantKit {
     }
     // Client version
     version() {
-        return "0.0.23";
+        return "0.0.26";
     }
 }
 exports.default = VoximplantKit;

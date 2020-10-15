@@ -3,9 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 const qs = require("qs");
 class api {
-    constructor(domain, token, isTest) {
+    constructor(domain, token, isTest, url) {
         this.client = axios_1.default.create({
-            baseURL: isTest ? "https://voximplant.xyz/api" : "https://kit.voximplant.com/api",
+            baseURL: isTest ? "https://voximplant.xyz/api" : `https://${url}/api`,
             method: "POST",
             responseType: "json",
             headers: {

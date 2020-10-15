@@ -94,6 +94,7 @@ export interface MessagePayloadItem {
     message_type?: string;
     name?: string;
     queue?: QueueInfo;
+    skills?: Array<SkillObject>;
     text?: string;
     url?: string;
     latitude?: number;
@@ -109,6 +110,7 @@ export default class VoximplantKit {
     private responseData;
     private accessToken;
     private sessionAccessUrl;
+    private apiUrl;
     private domain;
     private functionId;
     eventType: string;
@@ -140,9 +142,9 @@ export default class VoximplantKit {
     cancelFinishRequest(): boolean;
     transferToQueue(queue: QueueInfo): boolean;
     cancelTransferToQueue(): boolean;
-    private loadDB(db_name);
-    private saveDB(db_name, value);
-    private saveDb(type);
+    private loadDB;
+    private saveDB;
+    private saveDb;
     dbGet(key: string, scope?: string): any;
     dbSet(key: string, value: any, scope?: string): void;
     dbGetAll(scope?: string): any;
