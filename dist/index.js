@@ -397,7 +397,7 @@ class VoximplantKit {
     }
     // Client version
     version() {
-        return "0.0.26";
+        return "0.0.27";
     }
 }
 exports.default = VoximplantKit;

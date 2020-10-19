@@ -16,6 +16,8 @@ class api {
             param.data = qs.stringify(param.data);
             if (typeof param.params === "undefined")
                 param.params = {};
+            if (!token)
+                throw new Error('token is a required parameter');
             param.params.domain = domain;
             param.params.access_token = token;
             return param;
