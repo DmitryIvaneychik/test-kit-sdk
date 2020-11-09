@@ -33,6 +33,20 @@ export interface MessageConversation {
     custom_data: ConversationCustomDataObject;
     current_status: string;
     current_request: IncomingRequestObject;
+    channel: MessageConversationChannel;
+    customer_id?: number;
+}
+export interface MessageConversationChannel {
+    id: number;
+    channel_uuid: string;
+    account: object;
+    channel_type: string;
+    channel_settings: object;
+    processing_method: string;
+    processing_queue: object;
+    processing_function: number;
+    partner_id: number;
+    access_token: string;
 }
 export interface ConversationCustomDataObject {
     client_data: ConversationCustomDataClientDataObject;
@@ -61,6 +75,17 @@ export interface MessageObject {
     sender: MessageSender;
     conversation: MessageConversation;
     payload: Array<MessagePayloadItem>;
+    customer: MessageCustomer;
+}
+export interface MessageCustomer {
+    id: number;
+    customer_display_name: string;
+    customer_details: string;
+    customer_photo: string;
+    customer_phones: string[];
+    customer_client_ids: object[][];
+    customer_external_id: string;
+    customer_emails: string[];
 }
 export interface IncomingMessageObject {
     text: string;

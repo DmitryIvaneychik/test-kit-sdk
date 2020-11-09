@@ -61,7 +61,19 @@ class VoximplantKit {
                     end_time: null,
                     completed: null,
                     conversation_id: null
-                }
+                },
+                channel: null,
+                customer_id: null
+            },
+            customer: {
+                id: null,
+                customer_display_name: null,
+                customer_details: null,
+                customer_photo: null,
+                customer_phones: null,
+                customer_client_ids: null,
+                customer_external_id: null,
+                customer_emails: null
             },
             payload: []
         };
@@ -100,7 +112,19 @@ class VoximplantKit {
                     end_time: null,
                     completed: null,
                     conversation_id: null
-                }
+                },
+                channel: null,
+                customer_id: null
+            },
+            customer: {
+                id: null,
+                customer_display_name: null,
+                customer_details: null,
+                customer_photo: null,
+                customer_phones: null,
+                customer_client_ids: null,
+                customer_external_id: null,
+                customer_emails: null
             },
             payload: []
         };
@@ -397,7 +421,7 @@ class VoximplantKit {
     }
     // Client version
     version() {
-        return "0.0.27";
+        return "0.0.28";
     }
 }
 exports.default = VoximplantKit;

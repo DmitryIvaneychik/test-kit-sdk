@@ -44,7 +44,22 @@ export interface MessageConversation {
     client_id:string
     custom_data:ConversationCustomDataObject
     current_status:string
-    current_request:IncomingRequestObject
+    current_request:IncomingRequestObject,
+    channel: MessageConversationChannel,
+    customer_id?: number,
+}
+
+export interface MessageConversationChannel  {
+    id: number
+    channel_uuid: string,
+    account: object,
+    channel_type: string,// 'telegram'
+    channel_settings: object,
+    processing_method: string,
+    processing_queue: object,
+    processing_function: number,
+    partner_id: number,
+    access_token: string
 }
 
 export interface ConversationCustomDataObject {
@@ -77,7 +92,19 @@ export interface MessageObject {
     type:string
     sender:MessageSender
     conversation:MessageConversation
-    payload:Array<MessagePayloadItem>
+    payload:Array<MessagePayloadItem>,
+    customer: MessageCustomer
+}
+
+export interface MessageCustomer {
+    id: number,
+    customer_display_name: string,
+    customer_details: string,
+    customer_photo: string,
+    customer_phones: string[],
+    customer_client_ids: object[][],
+    customer_external_id: string,
+    customer_emails: string[]
 }
 
 export interface IncomingMessageObject {
@@ -183,7 +210,19 @@ export default class VoximplantKit {
                 end_time:null,
                 completed:null,
                 conversation_id:null
-            }
+            },
+            channel: null,
+            customer_id: null
+        },
+        customer: {
+            id: null,
+            customer_display_name: null,
+            customer_details: null,
+            customer_photo: null,
+            customer_phones: null,
+            customer_client_ids: null,
+            customer_external_id: null,
+            customer_emails: null
         },
         payload:[]
     }
@@ -222,7 +261,19 @@ export default class VoximplantKit {
                 end_time:null,
                 completed:null,
                 conversation_id:null
-            }
+            },
+            channel: null,
+            customer_id: null
+        },
+        customer: {
+            id: null,
+            customer_display_name: null,
+            customer_details: null,
+            customer_photo: null,
+            customer_phones: null,
+            customer_client_ids: null,
+            customer_external_id: null,
+            customer_emails: null
         },
         payload: []
     }
@@ -565,6 +616,6 @@ export default class VoximplantKit {
 
     // Client version
     version() {
-        return "0.0.27"
+        return "0.0.28"
     }
 }
