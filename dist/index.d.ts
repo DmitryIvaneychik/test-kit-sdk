@@ -83,9 +83,13 @@ export interface MessageCustomer {
     customer_details: string;
     customer_photo: string;
     customer_phones: string[];
-    customer_client_ids: object[][];
+    customer_client_ids: MessageCustomerClientIds[];
     customer_external_id: string;
     customer_emails: string[];
+}
+export interface MessageCustomerClientIds {
+    client_id: string;
+    client_type: string;
 }
 export interface IncomingMessageObject {
     text: string;
