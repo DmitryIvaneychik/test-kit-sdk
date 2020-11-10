@@ -26,6 +26,7 @@ class VoximplantKit {
         this.variables = {};
         this.headers = {};
         this.skills = [];
+        this.priority = 0;
         this.incomingMessage = {
             text: null,
             type: null,
@@ -135,10 +136,12 @@ class VoximplantKit {
         this.db = {};
         this.isTest = isTest;
         this.http = axios_1.default;
-        if (typeof context.request === "undefined") {
-            context.request = {
-                body: {},
-                headers: {}
+        if (typeof context === 'undefined' || typeof context.request === "undefined") {
+            context = {
+                request: {
+                    body: {},
+                    headers: {}
+                }
             };
         }
         // Store request data
@@ -198,6 +201,18 @@ class VoximplantKit {
             };
         }));
     }
+    setPriority(value) {
+        if (typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 10) {
+            this.priority = value;
+        }
+        else {
+            console.warn(`The value ${value} cannot be set as a priority. An integer from 0 to 10 is expected`);
+        }
+        return this.priority;
+    }
+    getPriority() {
+        return this.priority;
+    }
     // Get function response
     getResponseBody(data) {
         if (this.eventType === EVENT_TYPES.in_call_function)
@@ -211,6 +226,7 @@ class VoximplantKit {
             });
             if (payloadIndex !== -1) {
                 this.replyMessage.payload[payloadIndex].skills = this.skills;
+                this.replyMessage.payload[payloadIndex].priority = this.priority;
             }
             return {
                 text: this.replyMessage.text,
@@ -403,11 +419,15 @@ class VoximplantKit {
             source: from,
             destination: to,
             sms_body: message
-        }).then(r => { return r.data; });
+        }).then(r => {
+            return r.data;
+        });
     }
     // Voximplant Kit API proxy
     apiProxy(url, data) {
-        return this.api.request(url, data).then(r => { return r.data; });
+        return this.api.request(url, data).then(r => {
+            return r.data;
+        });
     }
     // Add photo
     addPhoto(url) {
@@ -421,7 +441,7 @@ class VoximplantKit {
     }
     // Client version
     version() {
-        return "0.0.29";
+        return "0.0.30";
     }
 }
 exports.default = VoximplantKit;

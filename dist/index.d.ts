@@ -124,6 +124,7 @@ export interface MessagePayloadItem {
     name?: string;
     queue?: QueueInfo;
     skills?: Array<SkillObject>;
+    priority?: number;
     text?: string;
     url?: string;
     latitude?: number;
@@ -147,6 +148,7 @@ export default class VoximplantKit {
     variables: object;
     headers: object;
     skills: Array<SkillObject>;
+    private priority;
     incomingMessage: MessageObject;
     replyMessage: MessageObject;
     private conversationDB;
@@ -157,6 +159,8 @@ export default class VoximplantKit {
     http: AxiosInstance;
     constructor(context: ContextObject, isTest?: boolean);
     loadDatabases(): Promise<void>;
+    setPriority(value: number): number;
+    getPriority(): number;
     getResponseBody(data: any): any;
     getIncomingMessage(): MessageObject;
     setAccessToken(token: any): void;
